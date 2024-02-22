@@ -12,6 +12,7 @@ from tests.factories import AccountFactory
 from service.common import status  # HTTP Status Codes
 from service.models import db, Account, init_db
 from service.routes import app
+from service import talisman
 
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql://postgres:postgres@localhost:5432/postgres"
@@ -36,6 +37,7 @@ class TestAccountService(TestCase):
         app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URI
         app.logger.setLevel(logging.CRITICAL)
         init_db(app)
+        talisman.force_https = False
 
     @classmethod
     def tearDownClass(cls):
@@ -174,7 +176,7 @@ class TestAccountService(TestCase):
         """It should not allow an illegal method call"""
         resp = self.client.delete(BASE_URL)
         self.assertEqual(resp.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)   
-         
+
     def test_security_headers(self):
         """It should return security headers"""
         response = self.client.get('/', environ_overrides=HTTPS_ENVIRON)
